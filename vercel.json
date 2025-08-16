@@ -1,0 +1,42 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "out"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "src/app/page.tsx"
+        },
+        {
+            "src": "/login",
+            "dest": "src/app/api/auth/login/page.tsx"
+        },
+        {
+            "src": "/aigen",
+            "dest": "src/app/api/auth/login/gensurvey/page.tsx"
+        },
+        {
+            "src": "/signup",
+            "dest": "src/app/api/auth/signup/page.tsx"
+        },
+        {
+            "src": "/forgot-password",
+            "dest": "src/app/api/auth/forgot-password/page.tsx"
+        },
+        {
+            "src": "/surveyedit",
+            "dest": "src/app/api/auth/login/surveyedit/page.tsx"
+        },
+        {
+            "src": "/surveyset",
+            "dest": "src/app/api/auth/login/surveyset/page.tsx"
+        }
+    ]
+}
