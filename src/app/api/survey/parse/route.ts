@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // 檔案：src/app/api/survey/parse/route.ts
 // 說明：
 // - 接收任意文字格式（Markdown、純文字）描述的問卷，嘗試解析為結構化 JSON。

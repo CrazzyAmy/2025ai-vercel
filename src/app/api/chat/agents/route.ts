@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 //import { UIMessage as VercelChatMessage, StreamingTextResponse } from "ai";
 //import { StreamingTextResponse } from "ai/react";
