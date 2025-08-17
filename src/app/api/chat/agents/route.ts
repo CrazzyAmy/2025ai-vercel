@@ -22,12 +22,19 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
 const extractTextFromParts = (m: VercelChatMessage): string => {
   return (m.parts ?? [])
-    .map((p: any) => {
+    .map((p) => {
       // 只擷取「文字型」內容；有需要也可把 reasoning 一併串上
       if (p.type === "text" || p.type === "reasoning") return p.text ?? "";
       // 若想把工具輸出也拼進歷史，可加上：
-      if (typeof p.type === "string" && p.type.startsWith("tool-")) {
-        if (p.state === "output-available" && typeof p.output === "string") return p.output;
+      if (
+        typeof p.type === "string" &&
+        p.type.startsWith("tool-") &&
+        "state" in p &&
+        (p as { state?: unknown }).state === "output-available" &&
+        "output" in p &&
+        typeof (p as { output?: unknown }).output === "string"
+      ) {
+        return (p as { output: string }).output;
       }
       return "";
     })
@@ -47,7 +54,9 @@ const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
     typeof message.content === "string"
       ? message.content
       : Array.isArray(message.content)
-        ? message.content.map((c: any) => (typeof c === "string" ? c : c?.text ?? "")).join("\n")
+        ? (message.content as Array<string | { text?: string }>)
+            .map((c) => (typeof c === "string" ? c : c?.text ?? ""))
+            .join("\n")
         : String(message.content ?? "");
 
   const role =
@@ -55,7 +64,7 @@ const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
       ? ("user" as const)
       : message._getType() === "ai"
         ? ("assistant" as const)
-        : (message._getType() as any);
+        : (message._getType() as VercelChatMessage["role"]);
 
   return {
     id: crypto.randomUUID(),              // 產生一個 UI 需要的 id
@@ -137,7 +146,8 @@ export async function POST(req: NextRequest) {
         { status: 200 },
       );
     }
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: e.status ?? 500 });
+  } catch (e: unknown) {
+    const error = e as { message?: string; status?: number };
+    return NextResponse.json({ error: error.message ?? "Unknown error" }, { status: error.status ?? 500 });
   }
 }
