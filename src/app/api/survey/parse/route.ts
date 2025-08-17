@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable prefer-const */
 
 // 檔案：src/app/api/survey/parse/route.ts
 // 說明：
