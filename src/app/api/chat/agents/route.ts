@@ -22,12 +22,21 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
 const extractTextFromParts = (m: VercelChatMessage): string => {
   return (m.parts ?? [])
-    .map((p: any) => {
+    .map((p) => {
       // 只擷取「文字型」內容；有需要也可把 reasoning 一併串上
       if (p.type === "text" || p.type === "reasoning") return p.text ?? "";
       // 若想把工具輸出也拼進歷史，可加上：
-      if (typeof p.type === "string" && p.type.startsWith("tool-")) {
-        if (p.state === "output-available" && typeof p.output === "string") return p.output;
+      // if (typeof p.type === "string" && p.type.startsWith("tool-")) {
+      //   if (p.state === "output-available" && typeof p.output === "string") return p.output;
+      if (
+        typeof p.type === "string" &&
+        p.type.startsWith("tool-") &&
+        "state" in p &&
+        (p as { state?: unknown }).state === "output-available" &&
+        "output" in p &&
+        typeof (p as { output?: unknown }).output === "string"
+      ) {
+        return (p as { output: string }).output;
       }
       return "";
     })
