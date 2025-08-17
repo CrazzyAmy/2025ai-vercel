@@ -12,14 +12,23 @@ import {
   BaseMessage,
   ChatMessage,
   HumanMessage,
+  isSystemMessage,
+  isAIMessage,
+  isHumanMessage,
   SystemMessage,
+  MessageContent,
+  MessageContentComplex,
+  ToolMessage,
 } from "@langchain/core/messages";
 
 // v5 起 "ai" 不再輸出 StreamingTextResponse，這裡只保留訊息型別
 import { UIMessage as VercelChatMessage } from "ai";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 // 假設仍然：import { UIMessage as VercelChatMessage } from "ai";
+//import { isAIMessage } from "@langchain/core/messages";
 
+//const message = new AIMessage("Hello!");
+//isAIMessage(message); // true
 const extractTextFromParts = (m: VercelChatMessage): string => {
   return (m.parts ?? [])
     .map((p) => {
@@ -51,28 +60,113 @@ const convertVercelMessageToLangChainMessage = (m: VercelChatMessage) => {
   return new ChatMessage({ content: text, role: m.role });
 };
 
-const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
-  const text =
-    typeof message.content === "string"
-      ? message.content
-      : Array.isArray(message.content)
-        ? message.content.map((c: any) => (typeof c === "string" ? c : c?.text ?? "")).join("\n")
-        : String(message.content ?? "");
+type VercelRole = "user" | "assistant" | "system" | (string & {});
 
-  const role =
-    message._getType() === "human"
-      ? ("user" as const)
-      : message._getType() === "ai"
-        ? ("assistant" as const)
-        : (message._getType() as any);
+// const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
+//   const text = messageToPlainText(message);
+
+//   const role: VercelRole =
+//     message._getType() === "human"
+//       ? "user"
+//       : message._getType() === "ai"
+//         ? "assistant"
+//         : (message._getType() as VercelRole);
+
+//   return {
+//     id: crypto.randomUUID(),
+//     role,
+//     parts: [{ type: "text", text }],
+//   };
+// };
+
+const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
+  const text = messageToPlainText(message);
+
+  let role: VercelRole;
+  if (isHumanMessage(message)) role = "user";
+  else if (isAIMessage(message)) role = "assistant";
+  else if (isSystemMessage(message)) role = "system";
+  //else role = message.getType() as VercelRole; // 其餘維持原型別字串
+  else role = "assistant"
 
   return {
-    id: crypto.randomUUID(),              // 產生一個 UI 需要的 id
+    id: crypto.randomUUID(),
     role,
-    parts: [{ type: "text", text }],      // ✅ v5 需要 parts，而非 content
+    parts: [{ type: "text", text }],
   };
 };
 
+/** 判斷是否為 { type: "text" | "reasoning", text?: string } */
+function isTextLike(
+  part: unknown
+): part is { type: "text" | "reasoning"; text?: string } {
+  return (
+    typeof part === "object" &&
+    part !== null &&
+    "type" in part &&
+    ( (part as { type: unknown }).type === "text" ||
+      (part as { type: unknown }).type === "reasoning" ) &&
+    // text 可能不存在，但若存在應為字串
+    (!("text" in part) || typeof (part as { text?: unknown }).text === "string")
+  );
+}
+/** 判斷是否為 tool_result；不假設具體型別，只要求有 content 欄位 */
+function isToolResult(
+  part: unknown
+): part is { type: "tool_result"; content?: unknown } {
+  return (
+    typeof part === "object" &&
+    part !== null &&
+    "type" in part &&
+    (part as { type: unknown }).type === "tool_result"
+  );
+}
+function messageContentPartToText(part: MessageContentComplex): string {
+  // 1) 直接是字串
+  if (typeof part === "string") return part;
+
+  // 2) text / reasoning
+  if (isTextLike(part)) return part.text ?? "";
+
+  // 3) tool_result（content 可能是 string 或陣列）
+  if (isToolResult(part)) {
+    const c = part.content;
+    if (typeof c === "string") return c;
+
+    if (Array.isArray(c)) {
+      return c
+        .map((inner) => {
+          if (typeof inner === "string") return inner;
+          if (isTextLike(inner)) return inner.text ?? "";
+          return "";
+        })
+        .filter(Boolean)
+        .join("\n");
+    }
+    return "";
+  }
+
+  // 4) 其他型別（例如 image_url / tool_use ...）目前不轉文字
+  return "";
+}
+
+
+
+function messageToPlainText(message: BaseMessage): string {
+  const content: MessageContent = message.content;
+
+  if (typeof content === "string") return content;
+
+  if (Array.isArray(content)) {
+    return content
+      .map((part) => messageContentPartToText(part))
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  // 理論上不會到這，但保底
+  return String(content ?? "");
+}
 
 const AGENT_SYSTEM_TEMPLATE = `You are a talking parrot named Polly. All final responses must be how a talking parrot would respond. Squawk often!`;
 
