@@ -60,6 +60,10 @@ Step3. Add the detail demands of your product. Then the customize survey will ge
 Step4. Generate the script survey.
 ![](https://github.com/CrazzyAmy/2025ai-vercel/blob/e87e472be7d4be408a9d6e8c8c374b6342a2e35e/imgs/v0_SOP4.png)
 ![](https://github.com/CrazzyAmy/2025ai-vercel/blob/e87e472be7d4be408a9d6e8c8c374b6342a2e35e/imgs/v0_SOP5.png)
+Step5. Publish the survey
+![](https://github.com/CrazzyAmy/2025ai-vercel/blob/0acc80e8cbc89f3a2efcc5d051f44cbb27562ffc/imgs/V0_SOP6.jpg)
 
-
+Future Goal. More customize UIUX, More Humanity and More in line with needs.
+![](https://github.com/CrazzyAmy/2025ai-vercel/blob/0acc80e8cbc89f3a2efcc5d051f44cbb27562ffc/imgs/V0_SOP7.png)
+![](https://github.com/CrazzyAmy/2025ai-vercel/blob/0acc80e8cbc89f3a2efcc5d051f44cbb27562ffc/imgs/V0_SOP7.jpg)
 
