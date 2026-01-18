@@ -36,6 +36,21 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 ## Operation steps
+Step0.
+Add the .env in the foot root
+```javascript
+GOOGLE_API_KEY='YOUR_GOOGLE_API_KEY'
+
+
+AUTH0_SECRET='YOUR_AUTH0_SECRET'
+APP_BASE_URL='YOUR_APP_BASE_URL'
+AUTH0_DOMAIN='YOUR_AUTH0_DOMAIN'
+AUTH0_CLIENT_ID='YOUR_AUTH0_CLIENT_ID'
+AUTH0_CLIENT_SECRET='YOUR_AUTH0_CLIENT_SECRET'
+# 'If your application is API authorized add the variables AUTH0_AUDIENCE and AUTH0_SCOPE'
+AUTH0_AUDIENCE='your_auth_api_identifier'
+AUTH0_SCOPE='openid profile email read:shows'
+```
 Step1. Click the "Login" button.
 ![](https://github.com/CrazzyAmy/2025ai-vercel/blob/21820641f77f730fa0ef22233867355248bbd78b/imgs/V0_SOP1.png)
 Step2. Click the "Login" button.
